@@ -1,0 +1,268 @@
+
+
+================================================================
+== Synthesis Summary Report of 'gemm'
+================================================================
++ General Information: 
+    * Date:           Tue Nov 10 17:40:57 2026
+    * Version:        2025.1 (Build 6135595 on May 21 2025)
+    * Project:        GEMM
+    * Solution:       hls (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z020-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +-------------------------------------------+------+------+---------+-----------+----------+---------+------+----------+----------+----------+-----------+-------------+-----+
+    |                  Modules                  | Issue|      |       Latency       | Iteration|         | Trip |          |          |          |           |             |     |
+    |                  & Loops                  | Type | Slack| (cycles)|    (ns)   |  Latency | Interval| Count| Pipelined|   BRAM   |    DSP   |     FF    |     LUT     | URAM|
+    +-------------------------------------------+------+------+---------+-----------+----------+---------+------+----------+----------+----------+-----------+-------------+-----+
+    |+ gemm                                     |     -|  0.00|     9896|  9.896e+04|         -|     9897|     -|        no|  30 (10%)|  40 (18%)|  7272 (6%)|  10541 (19%)|    -|
+    | + gemm_Pipeline_rdata_a_cdata_a           |     -|  0.00|      643|  6.430e+03|         -|      641|     -|    rewind|         -|         -|   69 (~0%)|    161 (~0%)|    -|
+    |  o rdata_a_cdata_a                        |     -|  7.30|      641|  6.410e+03|         3|        1|   640|       yes|         -|         -|          -|            -|    -|
+    | + gemm_Pipeline_rdata_b_cdata_b           |     -|  0.00|     4099|  4.099e+04|         -|     4097|     -|    rewind|         -|         -|   72 (~0%)|    157 (~0%)|    -|
+    |  o rdata_b_cdata_b                        |     -|  7.30|     4097|  4.097e+04|         3|        1|  4096|       yes|         -|         -|          -|            -|    -|
+    | + gemm_Pipeline_rdata_c_cdata_c           |     -|  0.98|      643|  6.430e+03|         -|      641|     -|    rewind|         -|         -|   33 (~0%)|    135 (~0%)|    -|
+    |  o rdata_c_cdata_c                        |     -|  7.30|      641|  6.410e+03|         3|        1|   640|       yes|         -|         -|          -|            -|    -|
+    | + gemm_Pipeline_wrdata_c_wrcdata_c_idx_n  |     -|  0.04|     5134|  5.134e+04|         -|     5121|     -|    rewind|         -|  40 (18%)|  4625 (4%)|   6235 (11%)|    -|
+    |  o wrdata_c_wrcdata_c_idx_n               |     -|  7.30|     5132|  5.132e+04|        14|        1|  5120|       yes|         -|         -|          -|            -|    -|
+    | + gemm_Pipeline_write_rc_write_cc         |     -|  0.00|      644|  6.440e+03|         -|      641|     -|    rewind|         -|         -|   63 (~0%)|    188 (~0%)|    -|
+    |  o write_rc_write_cc                      |     -|  7.30|      642|  6.420e+03|         4|        1|   640|       yes|         -|         -|          -|            -|    -|
+    +-------------------------------------------+------+------+---------+-----------+----------+---------+------+----------+----------+----------+-----------+-------------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| Interface    | Read/Write | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   | Resource Estimate |
+|              |            | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |                   |
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| m_axi_a_port | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_b_port | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_c_port | WRITE_ONLY | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          |                   |
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+
+* S_AXILITE Interfaces
++-------------------+------------+---------------+--------+----------+
+| Interface         | Data Width | Address Width | Offset | Register |
++-------------------+------------+---------------+--------+----------+
+| s_axi_CONTROL_BUS | 32         | 6             | 16     | 0        |
++-------------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface         | Register | Offset | Width | Access | Description                      | Bit Fields                                                           |
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_CONTROL_BUS | CTRL     | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_CONTROL_BUS | GIER     | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_CONTROL_BUS | IP_IER   | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_CONTROL_BUS | IP_ISR   | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_CONTROL_BUS | a_1      | 0x10   | 32    | W      | Data signal of a                 |                                                                      |
+| s_axi_CONTROL_BUS | a_2      | 0x14   | 32    | W      | Data signal of a                 |                                                                      |
+| s_axi_CONTROL_BUS | b_1      | 0x1c   | 32    | W      | Data signal of b                 |                                                                      |
+| s_axi_CONTROL_BUS | b_2      | 0x20   | 32    | W      | Data signal of b                 |                                                                      |
+| s_axi_CONTROL_BUS | c_1      | 0x28   | 32    | W      | Data signal of c                 |                                                                      |
+| s_axi_CONTROL_BUS | c_2      | 0x2c   | 32    | W      | Data signal of c                 |                                                                      |
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++----------+-----------+----------+
+| Argument | Direction | Datatype |
++----------+-----------+----------+
+| a        | in        | float*   |
+| b        | in        | float*   |
+| c        | out       | float*   |
++----------+-----------+----------+
+
+* SW-to-HW Mapping
++----------+-------------------+-----------+----------+-------------------------------+
+| Argument | HW Interface      | HW Type   | HW Usage | HW Info                       |
++----------+-------------------+-----------+----------+-------------------------------+
+| a        | m_axi_a_port      | interface |          | channel=0                     |
+| a        | s_axi_CONTROL_BUS | register  | offset   | name=a_1 offset=0x10 range=32 |
+| a        | s_axi_CONTROL_BUS | register  | offset   | name=a_2 offset=0x14 range=32 |
+| b        | m_axi_b_port      | interface |          | channel=0                     |
+| b        | s_axi_CONTROL_BUS | register  | offset   | name=b_1 offset=0x1c range=32 |
+| b        | s_axi_CONTROL_BUS | register  | offset   | name=b_2 offset=0x20 range=32 |
+| c        | m_axi_c_port      | interface |          | channel=0                     |
+| c        | s_axi_CONTROL_BUS | register  | offset   | name=c_1 offset=0x28 range=32 |
+| c        | s_axi_CONTROL_BUS | register  | offset   | name=c_2 offset=0x2c range=32 |
++----------+-------------------+-----------+----------+-------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+-----------+--------+-------+----------+---------------+
+| HW Interface | Direction | Length | Width | Loop     | Loop Location |
++--------------+-----------+--------+-------+----------+---------------+
+| m_axi_a_port | read      | 640    | 32    | rdata_a  | gemm.cc:28:11 |
+| m_axi_b_port | read      | 4096   | 32    | rdata_b  | gemm.cc:35:21 |
+| m_axi_c_port | write     | 640    | 32    | write_rc | gemm.cc:60:23 |
++--------------+-----------+--------+-------+----------+---------------+
+
+* All M_AXI Variable Accesses
++--------------+----------+-----------------+-----------+--------------+--------+----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+| HW Interface | Variable | Access Location | Direction | Burst Status | Length | Loop     | Loop Location | Resolution | Problem                                                                                                 |
++--------------+----------+-----------------+-----------+--------------+--------+----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+| m_axi_a_port | a        | gemm.cc:31:34   | read      | Widen Fail   |        | cdata_a  | gemm.cc:29:21 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_a_port | a        | gemm.cc:31:34   | read      | Inferred     | 640    | rdata_a  | gemm.cc:28:11 |            |                                                                                                         |
+| m_axi_b_port | b        | gemm.cc:38:34   | read      | Widen Fail   |        | cdata_b  | gemm.cc:36:22 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_b_port | b        | gemm.cc:38:34   | read      | Inferred     | 4096   | rdata_b  | gemm.cc:35:21 |            |                                                                                                         |
+| m_axi_c_port | c        | gemm.cc:62:32   | write     | Widen Fail   |        | write_cc | gemm.cc:61:28 | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_c_port | c        | gemm.cc:62:32   | write     | Inferred     | 640    | write_rc | gemm.cc:60:23 |            |                                                                                                         |
++--------------+----------+-----------------+-----------+--------------+--------+----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+
+    * Resolution URL: docs.xilinx.com/access/sources/dita/topic?Doc_Version=2025.1%20English&url=ug1448-hls-guidance&resourceid=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++-------------------------------------------+-----+--------+---------------+-----------+--------------------------+---------+
+| Name                                      | DSP | Pragma | Variable      | Op        | Impl                     | Latency |
++-------------------------------------------+-----+--------+---------------+-----------+--------------------------+---------+
+| + gemm                                    | 40  |        |               |           |                          |         |
+|  + gemm_Pipeline_rdata_a_cdata_a          | 0   |        |               |           |                          |         |
+|    icmp_ln28_fu_122_p2                    |     |        | icmp_ln28     | seteq     | auto                     | 0       |
+|    add_ln28_1_fu_128_p2                   |     |        | add_ln28_1    | add       | fabric                   | 0       |
+|    add_ln28_fu_151_p2                     |     |        | add_ln28      | add       | fabric                   | 0       |
+|    icmp_ln29_fu_157_p2                    |     |        | icmp_ln29     | seteq     | auto                     | 0       |
+|    select_ln28_fu_163_p3                  |     |        | select_ln28   | select    | auto_sel                 | 0       |
+|    select_ln28_1_fu_171_p3                |     |        | select_ln28_1 | select    | auto_sel                 | 0       |
+|    add_ln31_fu_191_p2                     |     |        | add_ln31      | add       | fabric                   | 0       |
+|    add_ln29_fu_197_p2                     |     |        | add_ln29      | add       | fabric                   | 0       |
+|  + gemm_Pipeline_rdata_b_cdata_b          | 0   |        |               |           |                          |         |
+|    icmp_ln35_fu_241_p2                    |     |        | icmp_ln35     | seteq     | auto                     | 0       |
+|    add_ln35_1_fu_247_p2                   |     |        | add_ln35_1    | add       | fabric                   | 0       |
+|    add_ln35_fu_327_p2                     |     |        | add_ln35      | add       | fabric                   | 0       |
+|    icmp_ln36_fu_267_p2                    |     |        | icmp_ln36     | seteq     | auto                     | 0       |
+|    select_ln35_fu_273_p3                  |     |        | select_ln35   | select    | auto_sel                 | 0       |
+|    select_ln35_1_fu_333_p3                |     |        | select_ln35_1 | select    | auto_sel                 | 0       |
+|    add_ln36_fu_313_p2                     |     |        | add_ln36      | add       | fabric                   | 0       |
+|  + gemm_Pipeline_rdata_c_cdata_c          | 0   |        |               |           |                          |         |
+|    icmp_ln42_fu_218_p2                    |     |        | icmp_ln42     | seteq     | auto                     | 0       |
+|    add_ln42_1_fu_224_p2                   |     |        | add_ln42_1    | add       | fabric                   | 0       |
+|    add_ln42_fu_298_p2                     |     |        | add_ln42      | add       | fabric                   | 0       |
+|    icmp_ln43_fu_238_p2                    |     |        | icmp_ln43     | seteq     | auto                     | 0       |
+|    select_ln42_fu_244_p3                  |     |        | select_ln42   | select    | auto_sel                 | 0       |
+|    select_ln42_1_fu_304_p3                |     |        | select_ln42_1 | select    | auto_sel                 | 0       |
+|    add_ln43_fu_284_p2                     |     |        | add_ln43      | add       | fabric                   | 0       |
+|  + gemm_Pipeline_wrdata_c_wrcdata_c_idx_n | 40  |        |               |           |                          |         |
+|    icmp_ln49_fu_461_p2                    |     |        | icmp_ln49     | seteq     | auto                     | 0       |
+|    add_ln49_1_fu_467_p2                   |     |        | add_ln49_1    | add       | fabric                   | 0       |
+|    add_ln49_fu_490_p2                     |     |        | add_ln49      | add       | fabric                   | 0       |
+|    icmp_ln50_fu_496_p2                    |     |        | icmp_ln50     | seteq     | auto                     | 0       |
+|    select_ln49_fu_502_p3                  |     |        | select_ln49   | select    | auto_sel                 | 0       |
+|    select_ln49_1_fu_510_p3                |     |        | select_ln49_1 | select    | auto_sel                 | 0       |
+|    xor_ln51_fu_526_p2                     |     |        | xor_ln51      | xor       | auto                     | 0       |
+|    or_ln49_fu_532_p2                      |     |        | or_ln49       | or        | auto                     | 0       |
+|    select_ln49_2_fu_538_p3                |     |        | select_ln49_2 | select    | auto_sel                 | 0       |
+|    add_ln50_fu_546_p2                     |     |        | add_ln50      | add       | fabric                   | 0       |
+|    o_3_mid2_fu_552_p3                     |     |        | o_3_mid2      | select    | auto_sel                 | 0       |
+|    select_ln50_fu_560_p3                  |     |        | select_ln50   | select    | auto_sel                 | 0       |
+|    empty_21_fu_632_p2                     |     |        | empty_21      | add       | fabric                   | 0       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U30      | 3   |        | mul           | fmul      | maxdsp                   | 3       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U22     | 2   |        | add           | fadd      | fulldsp                  | 4       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U31      | 3   |        | mul78_1       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U32      | 3   |        | mul78_2       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U33      | 3   |        | mul78_3       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U34      | 3   |        | mul78_4       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U35      | 3   |        | mul78_5       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U36      | 3   |        | mul78_6       | fmul      | maxdsp                   | 3       |
+|    fmul_32ns_32ns_32_4_max_dsp_1_U37      | 3   |        | mul78_7       | fmul      | maxdsp                   | 3       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U23     | 2   |        | add83_1       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U24     | 2   |        | add83_2       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U25     | 2   |        | add83_3       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U26     | 2   |        | add83_4       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U27     | 2   |        | add83_5       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U28     | 2   |        | add83_6       | fadd      | fulldsp                  | 4       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U29     | 2   |        | add83_7       | fadd      | fulldsp                  | 4       |
+|    add_ln51_fu_582_p2                     |     |        | add_ln51      | add       | fabric                   | 0       |
+|    add_ln50_1_fu_588_p2                   |     |        | add_ln50_1    | add       | fabric                   | 0       |
+|    select_ln50_1_fu_594_p3                |     |        | select_ln50_1 | select    | auto_sel                 | 0       |
+|  + gemm_Pipeline_write_rc_write_cc        | 0   |        |               |           |                          |         |
+|    icmp_ln60_fu_256_p2                    |     |        | icmp_ln60     | seteq     | auto                     | 0       |
+|    add_ln60_1_fu_262_p2                   |     |        | add_ln60_1    | add       | fabric                   | 0       |
+|    add_ln60_fu_279_p2                     |     |        | add_ln60      | add       | fabric                   | 0       |
+|    icmp_ln61_fu_285_p2                    |     |        | icmp_ln61     | seteq     | auto                     | 0       |
+|    select_ln60_fu_291_p3                  |     |        | select_ln60   | select    | auto_sel                 | 0       |
+|    select_ln60_1_fu_299_p3                |     |        | select_ln60_1 | select    | auto_sel                 | 0       |
+|    sparsemux_17_3_32_1_1_U57              |     |        | tmp           | sparsemux | compactencoding_dontcare | 0       |
+|    add_ln61_fu_341_p2                     |     |        | add_ln61      | add       | fabric                   | 0       |
++-------------------------------------------+-----+--------+---------------+-----------+--------------------------+---------+
+
+
+================================================================
+== Storage Report
+================================================================
++-----------------------+--------------+-----------+------+------+--------+------------+------+---------+------------------+
+| Name                  | Usage        | Type      | BRAM | URAM | Pragma | Variable   | Impl | Latency | Bitwidth, Depth, |
+|                       |              |           |      |      |        |            |      |         | Banks            |
++-----------------------+--------------+-----------+------+------+--------+------------+------+---------+------------------+
+| + gemm                |              |           | 30   | 0    |        |            |      |         |                  |
+|   CONTROL_BUS_s_axi_U | interface    | s_axilite |      |      |        |            |      |         |                  |
+|   a_port_m_axi_U      | interface    | m_axi     | 2    |      |        |            |      |         |                  |
+|   b_port_m_axi_U      | interface    | m_axi     | 2    |      |        |            |      |         |                  |
+|   c_port_m_axi_U      | interface    | m_axi     |      |      |        |            |      |         |                  |
+|   buffer_a_U          | ram_1p array |           | 2    |      |        | buffer_a   | auto | 1       | 32, 640, 1       |
+|   buffer_b_U          | ram_1p array |           | 2    |      |        | buffer_b   | auto | 1       | 32, 512, 1       |
+|   buffer_b_1_U        | ram_1p array |           | 2    |      |        | buffer_b_1 | auto | 1       | 32, 512, 1       |
+|   buffer_b_2_U        | ram_1p array |           | 2    |      |        | buffer_b_2 | auto | 1       | 32, 512, 1       |
+|   buffer_b_3_U        | ram_1p array |           | 2    |      |        | buffer_b_3 | auto | 1       | 32, 512, 1       |
+|   buffer_b_4_U        | ram_1p array |           | 2    |      |        | buffer_b_4 | auto | 1       | 32, 512, 1       |
+|   buffer_b_5_U        | ram_1p array |           | 2    |      |        | buffer_b_5 | auto | 1       | 32, 512, 1       |
+|   buffer_b_6_U        | ram_1p array |           | 2    |      |        | buffer_b_6 | auto | 1       | 32, 512, 1       |
+|   buffer_b_7_U        | ram_1p array |           | 2    |      |        | buffer_b_7 | auto | 1       | 32, 512, 1       |
+|   buffer_c_U          | ram_2p array |           | 2    |      |        | buffer_c   | auto | 1       | 32, 80, 1        |
+|   buffer_c_1_U        | ram_2p array |           | 2    |      |        | buffer_c_1 | auto | 1       | 32, 80, 1        |
+|   buffer_c_2_U        | ram_2p array |           | 2    |      |        | buffer_c_2 | auto | 1       | 32, 80, 1        |
+|   buffer_c_3_U        | ram_2p array |           | 2    |      |        | buffer_c_3 | auto | 1       | 32, 80, 1        |
+|   buffer_c_4_U        | ram_2p array |           | 2    |      |        | buffer_c_4 | auto | 1       | 32, 80, 1        |
+|   buffer_c_5_U        | ram_2p array |           | 2    |      |        | buffer_c_5 | auto | 1       | 32, 80, 1        |
+|   buffer_c_6_U        | ram_2p array |           | 2    |      |        | buffer_c_6 | auto | 1       | 32, 80, 1        |
+|   buffer_c_7_U        | ram_2p array |           | 2    |      |        | buffer_c_7 | auto | 1       | 32, 80, 1        |
++-----------------------+--------------+-----------+------+------+--------+------------+------+---------+------------------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------------+------------------------------------------------------------+------------------------------+
+| Type            | Options                                                    | Location                     |
++-----------------+------------------------------------------------------------+------------------------------+
+| INTERFACE       | m_axi port = a depth = 640 offset = slave bundle = a_port  | gemm.cc:9 in gemm            |
+| INTERFACE       | m_axi port = b depth = 4096 offset = slave bundle = b_port | gemm.cc:10 in gemm           |
+| INTERFACE       | m_axi port = c depth = 640 offset = slave bundle = c_port  | gemm.cc:11 in gemm           |
+| INTERFACE       | s_axilite port = a bundle = CONTROL_BUS                    | gemm.cc:13 in gemm           |
+| INTERFACE       | s_axilite port = b bundle = CONTROL_BUS                    | gemm.cc:14 in gemm           |
+| INTERFACE       | s_axilite port = c bundle = CONTROL_BUS                    | gemm.cc:15 in gemm           |
+| INTERFACE       | s_axilite port = return bundle = CONTROL_BUS               | gemm.cc:17 in gemm           |
+| ARRAY_PARTITION | variable=buffer_b dim=2 type=cyclic factor=8               | gemm.cc:24 in gemm, buffer_b |
+| ARRAY_PARTITION | variable=buffer_c dim=2 type=cyclic factor=8               | gemm.cc:25 in gemm, buffer_c |
+| PIPELINE        |                                                            | gemm.cc:52 in gemm           |
+| UNROLL          | factor=8                                                   | gemm.cc:53 in gemm           |
++-----------------+------------------------------------------------------------+------------------------------+
+
+

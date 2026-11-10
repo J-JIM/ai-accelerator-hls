@@ -1,0 +1,194 @@
+
+
+================================================================
+== Synthesis Summary Report of 'vadd'
+================================================================
++ General Information: 
+    * Date:           Thu Nov  5 21:57:55 2026
+    * Version:        2025.1 (Build 6135595 on May 21 2025)
+    * Project:        vadd
+    * Solution:       hls (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z020-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +----------------------------------+------+------+---------+-----------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+    |              Modules             | Issue|      |       Latency       | Iteration|         | Trip |          |         |         |           |           |     |
+    |              & Loops             | Type | Slack| (cycles)|    (ns)   |  Latency | Interval| Count| Pipelined|  BRAM   |   DSP   |     FF    |    LUT    | URAM|
+    +----------------------------------+------+------+---------+-----------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+    |+ vadd                            |     -|  0.00|     3105|  3.105e+04|         -|     3106|     -|        no|  10 (3%)|  2 (~0%)|  3001 (2%)|  3530 (6%)|    -|
+    | + vadd_Pipeline_1                |     -|  0.00|     1027|  1.027e+04|         -|     1025|     -|    rewind|        -|        -|   71 (~0%)|   73 (~0%)|    -|
+    |  o Loop 1                        |     -|  7.30|     1025|  1.025e+04|         3|        1|  1024|       yes|        -|        -|          -|          -|    -|
+    | + vadd_Pipeline_2                |     -|  0.00|     1027|  1.027e+04|         -|     1025|     -|    rewind|        -|        -|   71 (~0%)|   73 (~0%)|    -|
+    |  o Loop 1                        |     -|  7.30|     1025|  1.025e+04|         3|        1|  1024|       yes|        -|        -|          -|          -|    -|
+    | + vadd_Pipeline_VITIS_LOOP_28_1  |     -|  0.04|     1032|  1.032e+04|         -|     1025|     -|    rewind|        -|  2 (~0%)|  402 (~0%)|  484 (~0%)|    -|
+    |  o VITIS_LOOP_28_1               |     -|  7.30|     1030|  1.030e+04|         8|        1|  1024|       yes|        -|        -|          -|          -|    -|
+    | + vadd_Pipeline_4                |     -|  0.00|     1027|  1.027e+04|         -|     1025|     -|    rewind|        -|        -|   48 (~0%)|   73 (~0%)|    -|
+    |  o Loop 1                        |     -|  7.30|     1025|  1.025e+04|         3|        1|  1024|       yes|        -|        -|          -|          -|    -|
+    +----------------------------------+------+------+---------+-----------+----------+---------+------+----------+---------+---------+-----------+-----------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| Interface    | Read/Write | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   | Resource Estimate |
+|              |            | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |                   |
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| m_axi_a_port | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_b_port | READ_ONLY  | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_c_port | WRITE_ONLY | 32 -> 32   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          |                   |
++--------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+
+* S_AXILITE Interfaces
++-------------------+------------+---------------+--------+----------+
+| Interface         | Data Width | Address Width | Offset | Register |
++-------------------+------------+---------------+--------+----------+
+| s_axi_CONTROL_BUS | 32         | 6             | 16     | 0        |
++-------------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface         | Register | Offset | Width | Access | Description                      | Bit Fields                                                           |
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_CONTROL_BUS | CTRL     | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_CONTROL_BUS | GIER     | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_CONTROL_BUS | IP_IER   | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_CONTROL_BUS | IP_ISR   | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_CONTROL_BUS | a_1      | 0x10   | 32    | W      | Data signal of a                 |                                                                      |
+| s_axi_CONTROL_BUS | a_2      | 0x14   | 32    | W      | Data signal of a                 |                                                                      |
+| s_axi_CONTROL_BUS | b_1      | 0x1c   | 32    | W      | Data signal of b                 |                                                                      |
+| s_axi_CONTROL_BUS | b_2      | 0x20   | 32    | W      | Data signal of b                 |                                                                      |
+| s_axi_CONTROL_BUS | c_1      | 0x28   | 32    | W      | Data signal of c                 |                                                                      |
+| s_axi_CONTROL_BUS | c_2      | 0x2c   | 32    | W      | Data signal of c                 |                                                                      |
++-------------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++----------+-----------+----------+
+| Argument | Direction | Datatype |
++----------+-----------+----------+
+| a        | in        | float*   |
+| b        | in        | float*   |
+| c        | out       | float*   |
++----------+-----------+----------+
+
+* SW-to-HW Mapping
++----------+-------------------+-----------+----------+-------------------------------+
+| Argument | HW Interface      | HW Type   | HW Usage | HW Info                       |
++----------+-------------------+-----------+----------+-------------------------------+
+| a        | m_axi_a_port      | interface |          | channel=0                     |
+| a        | s_axi_CONTROL_BUS | register  | offset   | name=a_1 offset=0x10 range=32 |
+| a        | s_axi_CONTROL_BUS | register  | offset   | name=a_2 offset=0x14 range=32 |
+| b        | m_axi_b_port      | interface |          | channel=0                     |
+| b        | s_axi_CONTROL_BUS | register  | offset   | name=b_1 offset=0x1c range=32 |
+| b        | s_axi_CONTROL_BUS | register  | offset   | name=b_2 offset=0x20 range=32 |
+| c        | m_axi_c_port      | interface |          | channel=0                     |
+| c        | s_axi_CONTROL_BUS | register  | offset   | name=c_1 offset=0x28 range=32 |
+| c        | s_axi_CONTROL_BUS | register  | offset   | name=c_2 offset=0x2c range=32 |
++----------+-------------------+-----------+----------+-------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+-----------+--------+-------+-----------+---------------+
+| HW Interface | Direction | Length | Width | Loop      | Loop Location |
++--------------+-----------+--------+-------+-----------+---------------+
+| m_axi_a_port | read      | 1024   | 32    | anonymous | vadd.cc:24:5  |
+| m_axi_b_port | read      | 1024   | 32    | anonymous | vadd.cc:25:5  |
+| m_axi_c_port | write     | 1024   | 32    | anonymous | vadd.cc:32:5  |
++--------------+-----------+--------+-------+-----------+---------------+
+
+* All M_AXI Variable Accesses
++--------------+----------+-----------------+-----------+--------------+--------+-----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+| HW Interface | Variable | Access Location | Direction | Burst Status | Length | Loop      | Loop Location | Resolution | Problem                                                                                                 |
++--------------+----------+-----------------+-----------+--------------+--------+-----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+| m_axi_a_port | a        | vadd.cc:24:5    | read      | Widen Fail   |        | anonymous | vadd.cc:24:5  | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_a_port | a        | vadd.cc:24:5    | read      | Inferred     | 1024   | anonymous | vadd.cc:24:5  |            |                                                                                                         |
+| m_axi_b_port | b        | vadd.cc:25:5    | read      | Widen Fail   |        | anonymous | vadd.cc:25:5  | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_b_port | b        | vadd.cc:25:5    | read      | Inferred     | 1024   | anonymous | vadd.cc:25:5  |            |                                                                                                         |
+| m_axi_c_port | c        | vadd.cc:32:5    | write     | Widen Fail   |        | anonymous | vadd.cc:32:5  | 214-353    | Could not widen since type float size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_c_port | c        | vadd.cc:32:5    | write     | Inferred     | 1024   | anonymous | vadd.cc:32:5  |            |                                                                                                         |
++--------------+----------+-----------------+-----------+--------------+--------+-----------+---------------+------------+---------------------------------------------------------------------------------------------------------+
+
+    * Resolution URL: docs.xilinx.com/access/sources/dita/topic?Doc_Version=2025.1%20English&url=ug1448-hls-guidance&resourceid=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++--------------------------------------+-----+--------+-------------+-------+---------+---------+
+| Name                                 | DSP | Pragma | Variable    | Op    | Impl    | Latency |
++--------------------------------------+-----+--------+-------------+-------+---------+---------+
+| + vadd                               | 2   |        |             |       |         |         |
+|  + vadd_Pipeline_1                   | 0   |        |             |       |         |         |
+|    exitcond103_fu_86_p2              |     |        | exitcond103 | seteq | auto    | 0       |
+|    empty_fu_92_p2                    |     |        | empty       | add   | fabric  | 0       |
+|  + vadd_Pipeline_2                   | 0   |        |             |       |         |         |
+|    exitcond94_fu_86_p2               |     |        | exitcond94  | seteq | auto    | 0       |
+|    empty_fu_92_p2                    |     |        | empty       | add   | fabric  | 0       |
+|  + vadd_Pipeline_VITIS_LOOP_28_1     | 2   |        |             |       |         |         |
+|    icmp_ln28_fu_87_p2                |     |        | icmp_ln28   | seteq | auto    | 0       |
+|    add_ln28_fu_93_p2                 |     |        | add_ln28    | add   | fabric  | 0       |
+|    fadd_32ns_32ns_32_5_full_dsp_1_U7 | 2   |        | add         | fadd  | fulldsp | 4       |
+|  + vadd_Pipeline_4                   | 0   |        |             |       |         |         |
+|    exitcond6_fu_91_p2                |     |        | exitcond6   | seteq | auto    | 0       |
+|    empty_fu_97_p2                    |     |        | empty       | add   | fabric  | 0       |
++--------------------------------------+-----+--------+-------------+-------+---------+---------+
+
+
+================================================================
+== Storage Report
+================================================================
++-----------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+| Name                  | Usage        | Type      | BRAM | URAM | Pragma | Variable | Impl | Latency | Bitwidth, Depth, |
+|                       |              |           |      |      |        |          |      |         | Banks            |
++-----------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+| + vadd                |              |           | 10   | 0    |        |          |      |         |                  |
+|   CONTROL_BUS_s_axi_U | interface    | s_axilite |      |      |        |          |      |         |                  |
+|   a_port_m_axi_U      | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   b_port_m_axi_U      | interface    | m_axi     | 2    |      |        |          |      |         |                  |
+|   c_port_m_axi_U      | interface    | m_axi     |      |      |        |          |      |         |                  |
+|   buffer_a_U          | ram_1p array |           | 2    |      |        | buffer_a | auto | 1       | 32, 1024, 1      |
+|   buffer_b_U          | ram_1p array |           | 2    |      |        | buffer_b | auto | 1       | 32, 1024, 1      |
+|   buffer_c_U          | ram_1p array |           | 2    |      |        | buffer_c | auto | 1       | 32, 1024, 1      |
++-----------------------+--------------+-----------+------+------+--------+----------+------+---------+------------------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------+------------------------------------------------------------+--------------------+
+| Type      | Options                                                    | Location           |
++-----------+------------------------------------------------------------+--------------------+
+| INTERFACE | m_axi port = a depth = 1024 offset = slave bundle = a_port | vadd.cc:8 in vadd  |
+| INTERFACE | m_axi port = b depth = 1024 offset = slave bundle = b_port | vadd.cc:9 in vadd  |
+| INTERFACE | m_axi port = c depth = 1024 offset = slave bundle = c_port | vadd.cc:10 in vadd |
+| INTERFACE | s_axilite port = a bundle = CONTROL_BUS                    | vadd.cc:12 in vadd |
+| INTERFACE | s_axilite port = b bundle = CONTROL_BUS                    | vadd.cc:13 in vadd |
+| INTERFACE | s_axilite port = c bundle = CONTROL_BUS                    | vadd.cc:14 in vadd |
+| INTERFACE | s_axilite port = return bundle = CONTROL_BUS               | vadd.cc:16 in vadd |
++-----------+------------------------------------------------------------+--------------------+
+
+

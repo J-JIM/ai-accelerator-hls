@@ -1,0 +1,32 @@
+# Ignore build output directory
+/build
+/export
+
+# Ignore object files and dependent files
+.o
+.d
+
+#Ignore logs folder and log files
+/logs
+.log
+
+#Ignore lock files
+.lock
+
+.bin
+.pdi
+.vitisWorkspace.json
+
+_ide/logs
+_ide/.wsdata
+# --- repo: Vitis 작업 폴더 · IDE · 보고서 파일은 올리지 않는다 ---
+/_ide/
+/vadd/vadd/
+/GEMM/GEMM/
+.Xil/
+.cache/
+compile_commands.json
+/report/
+*.odt
+*.docx
+*.pdf
