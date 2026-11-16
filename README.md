@@ -11,6 +11,7 @@
 ```
 vadd/                vadd.cc · vadd.h · vadd_tb.cc · hls_config.cfg · vitis-comp.json
 GEMM/                gemm.cc (Opt 1) · gemm.h · gemm_tb.cc · hls_config.cfg · vitis-comp.json
+GEMM_tiled/          gemm_tiled.cc · gemm_tiled.h · gemm_tiled_tb.cc · hls_config.cfg · hls_config_baseline.cfg · vitis-comp.json · RUN.md
 results/vadd/        csynth.rpt · vadd_csynth.rpt · vadd_cosim.rpt
 results/gemm_opt1/   csynth.rpt · gemm_csynth.rpt · gemm_cosim.rpt
 ```
@@ -53,3 +54,7 @@ A(10×64) × B(64×64) = C(10×64), `float`. 행렬곱 루프 순서는 **m → 
 - **II와 자원**: 같은 UNROLL 8에서 II 1 · 4 · 8 → DSP 40 · 10 · 5. 처리량 ≈ factor ÷ II.
 - **비교 A~D**: 32비트 m_axi 포트 한계(읽기 루프 unroll 무효), C 자동 분할 후 누산 의존(II 6), 바깥 루프 PIPELINE 시 안쪽 루프 전체 unroll(II 8)을 보여 줍니다.
 - Opt 1에서도 데이터 이동(B 읽기 + C 쓰기)이 전체의 약 48%라, 다음 단계는 포트 폭 확장이나 타일링입니다.
+
+## p3 Tiled-GEMM (합성 전)
+
+M · N · O를 실행 시 입력(s_axilite)으로 받고, on-chip 버퍼에는 8×8 타일 하나만 올리는 GEMM입니다. 행렬 크기가 타일 크기로 나누어떨어지지 않으면 마지막 타일의 남는 칸을 0으로 채워 같은 행렬곱 회로를 그대로 씁니다. 현재는 g++ C simulation(크기 4가지)만 통과한 상태이고, C Synthesis와 co-simulation 결과는 아직 없습니다. 실행 순서는 `GEMM_tiled/RUN.md`에 있습니다.

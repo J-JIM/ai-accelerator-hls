@@ -23,6 +23,10 @@ _ide/.wsdata
 /_ide/
 /vadd/vadd/
 /GEMM/GEMM/
+/GEMM_tiled/GEMM_tiled/
+/GEMM_tiled/opt/
+/GEMM_tiled/base/
+/GEMM_tiled/csim
 .Xil/
 .cache/
 compile_commands.json
