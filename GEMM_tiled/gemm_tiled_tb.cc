@@ -6,16 +6,13 @@
 
 using namespace std;
 
-// Runs one case: fills A, B with random values in [-512, 511], poisons C,
-// calls the IP, compares every C cell with a golden C model that accumulates
-// over n in the same ascending order as the hardware.
 static int run_case(float *a, float *b, float *c, float *golden,
                     int M, int N, int O, const char *label){
-    // whole buffers get random data: cells beyond M*N / N*O are garbage the IP
-    // must never use (checks the zero padding of the last partial tile)
+
+
     for (int i = 0; i < MAX_ELEM; i++) a[i] = (float)(rand() % 1024) - 512;
     for (int i = 0; i < MAX_ELEM; i++) b[i] = (float)(rand() % 1024) - 512;
-    // poison: every C cell must be overwritten by the IP
+
     for (int i = 0; i < MAX_ELEM; i++) c[i] = 12345.0f;
     for (int i = 0; i < M * O; i++) golden[i] = 0;
 
@@ -37,7 +34,7 @@ static int run_case(float *a, float *b, float *c, float *golden,
             }
         }
     }
-    // cells after M*O must keep the poison value (IP must not write outside C)
+
     int overrun = 0;
     for (int i = M * O; i < MAX_ELEM; i++) if (c[i] != 12345.0f) overrun++;
 
@@ -55,14 +52,14 @@ int main(void){
     float *c      = (float *)malloc(sizeof(float) * MAX_ELEM);
     float *golden = (float *)malloc(sizeof(float) * MAX_ELEM);
     int fails = 0;
-    // 1) same size as p2 GEMM (M = 10 is already not a multiple of 8)
+
     fails += run_case(a, b, c, golden, 10, 64, 64, "p2 size   ");
-    // 2) every dimension a multiple of the tile size
-    fails += run_case(a, b, c, golden, 16, 32, 24, "divisible ");
-    // 3) none of M, N, O divisible by 8 (professor's 26 example included)
+
+    fails += run_case(a, b, c, golden, 16, 32, 24, "mid size  ");
+
     fails += run_case(a, b, c, golden, 13, 26, 18, "remainder ");
-    // 4) smaller than one tile in every dimension
     fails += run_case(a, b, c, golden,  3,  5,  7, "tiny      ");
+    fails += run_case(a, b, c, golden, 10, 40, 33, "unaligned ");
 
     if (fails){
         cout << "fail test bench (" << fails << " case(s))" << endl;

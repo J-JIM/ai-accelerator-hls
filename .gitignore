@@ -34,3 +34,7 @@ compile_commands.json
 *.odt
 *.docx
 *.pdf
+# p3 IDE 컴포넌트(빌드 폴더 포함)는 올리지 않는다. 설정은 README에 적음.
+# GEMM_tiled/와 대소문자만 달라서 macOS·Windows에서 폴더가 겹치는 것도 막는다.
+/Gemm_Tiled/
+/GEMM_tiled/_ide/

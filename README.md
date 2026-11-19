@@ -1,6 +1,6 @@
 # AI Accelerator HLS — VADD · GEMM on PYNQ-Z2
 
-인공지능가속기설계 실습 과제 **p1 VADD**와 **p2 GEMM**의 Vitis HLS 소스, 합성(C Synthesis) 리포트, C/RTL co-simulation 리포트입니다.
+인공지능가속기설계 실습 과제 **p1 VADD**, **p2 GEMM**, **p3 Tiled-GEMM**의 Vitis HLS 소스, 합성(C Synthesis) 리포트, C/RTL co-simulation 리포트입니다.
 
 - 툴: **Vitis HLS 2025.1** (Vivado IP Flow Target)
 - 보드: **PYNQ-Z2** (`xc7z020clg400-1`), 목표 클럭 **10 ns (100 MHz)**
@@ -11,9 +11,10 @@
 ```
 vadd/                vadd.cc · vadd.h · vadd_tb.cc · hls_config.cfg · vitis-comp.json
 GEMM/                gemm.cc (Opt 1) · gemm.h · gemm_tb.cc · hls_config.cfg · vitis-comp.json
-GEMM_tiled/          gemm_tiled.cc · gemm_tiled.h · gemm_tiled_tb.cc · hls_config.cfg · hls_config_baseline.cfg · vitis-comp.json · RUN.md
+GEMM_tiled/          gemm_tiled.cc · gemm_tiled.h · gemm_tiled_tb.cc   (IDE 컴포넌트 Gemm_Tiled가 이 소스를 씀)
 results/vadd/        csynth.rpt · vadd_csynth.rpt · vadd_cosim.rpt
 results/gemm_opt1/   csynth.rpt · gemm_csynth.rpt · gemm_cosim.rpt
+results/p3_final_struct_u16/   csynth.rpt · gemm_tiled_csynth.rpt · gemm_tiled_cosim.rpt · cosim_transaction.rpt
 ```
 
 ## 실행
@@ -55,6 +56,38 @@ A(10×64) × B(64×64) = C(10×64), `float`. 행렬곱 루프 순서는 **m → 
 - **비교 A~D**: 32비트 m_axi 포트 한계(읽기 루프 unroll 무효), C 자동 분할 후 누산 의존(II 6), 바깥 루프 PIPELINE 시 안쪽 루프 전체 unroll(II 8)을 보여 줍니다.
 - Opt 1에서도 데이터 이동(B 읽기 + C 쓰기)이 전체의 약 48%라, 다음 단계는 포트 폭 확장이나 타일링입니다.
 
-## p3 Tiled-GEMM (합성 전)
+## p3 Tiled-GEMM
 
-M · N · O를 실행 시 입력(s_axilite)으로 받고, on-chip 버퍼에는 8×8 타일 하나만 올리는 GEMM입니다. 행렬 크기가 타일 크기로 나누어떨어지지 않으면 마지막 타일의 남는 칸을 0으로 채워 같은 행렬곱 회로를 그대로 씁니다. 현재는 g++ C simulation(크기 4가지)만 통과한 상태이고, C Synthesis와 co-simulation 결과는 아직 없습니다. 실행 순서는 `GEMM_tiled/RUN.md`에 있습니다.
+A(M×N) × B(N×O) = C(M×O), `float`. **M · N · O는 실행 중에 s_axilite 레지스터**(`M` 0x34 · `N` 0x3c · `O` 0x44)로 받고, 타일 크기는 헤더 상수 `T_M`=5 · `T_N`=32 · `T_O`=32입니다. C 타일을 고정하고 k 방향으로 A·B 타일을 옮기며 누적하는 output-stationary 타일링이고, 경계 타일은 범위 밖을 0으로 채워 읽고 범위 안 칸만 씁니다.
+
+- 연산: `compute_tile`의 nn → mm → oo 루프, 맨 안쪽 oo에 `PIPELINE` + `UNROLL factor=16`, B·C 버퍼 `ARRAY_PARTITION type=cyclic factor=16 dim=2` (MAC 16개, II 1)
+- 구조: ① ping-pong 버퍼(계산하는 동안 다음 타일 읽기) ② 타일 3중 루프를 `step` 루프 하나로 합침 ③ C 초기화 루프 제거(k 첫 타일에서 0부터 누적) ④ 꽉 찬 타일은 조건 없는 루프로 읽어 burst(길이 32) 추론
+- 테스트벤치: 같은 하드웨어로 10×64×64(P2 크기) · 16×32×24 · 13×26×18 · 3×5×7 · 10×40×33 실행. 뒤의 넷은 타일 크기로 나누어떨어지지 않음. golden 비교 + M×O 밖 overrun 검사, C sim · co-sim 모두 PASS
+
+| 단계 (타일 5×32×32) | co-sim (10×64×64) | BRAM | DSP | FF | LUT |
+|---|---|---|---|---|---|
+| directive 없음 | 54,887 | 9 | 17 | 7,059 | 6,732 |
+| `PIPELINE` + `UNROLL 4` (B·C `PARTITION 8`) | 27,387 | 13 | 32 | 9,933 | 10,375 |
+| `UNROLL 8` + `PARTITION 8` | 19,043 | 13 | 52 | 11,720 | 12,948 |
+| + 구조 개선 ①~④ | 11,549 | 22 | 70 | 14,331 | 16,416 |
+| **+ `UNROLL 16` + `PARTITION 16` (최종)** | **11,229** | 38 (13%) | 110 (50%) | 19,183 (18%) | 24,666 (46%) |
+| 최종에서 `PARTITION 32`만 변경 | 23,520 (II 8) | 70 | 40 | 12,660 | 18,710 |
+
+- 최종 모듈(합성): load_a 177 · load_b 1,041 · compute_tile 334 · store 172 cycle, 추정 클럭 7.30 ns. load_a · load_b · compute_tile이 동시에 시작하므로 step 1회는 B 타일 읽기(1,041)가 정하고, 연산은 그 안에 숨습니다.
+- **P2 Opt 1(9,911)과 비교: 1.13배 느림.** T_M = 5 < M = 10이라 B를 두 번(8,192원소) 읽고 32비트 포트는 cycle당 1원소라, 연산을 두 배로 늘려도 메모리 읽기가 시간을 정합니다(구조 개선 뒤 UNROLL 8 → 16은 DSP +40에 latency −3%). 대신 행렬 크기를 재합성 없이 바꿀 수 있고 on-chip 메모리가 타일 크기로 고정됩니다.
+- 합성 리포트의 전체 latency는 `?`입니다(M · N · O를 실행 중에 받아 반복 횟수를 모름). latency는 co-sim으로 잽니다. co-sim TOTAL은 TB 케이스 합이라 `cosim_transaction.rpt`의 transaction 0(10×64×64)을 봅니다.
+- IDE 컴포넌트 `Gemm_Tiled`의 `hls_config.cfg` (빌드 폴더는 올리지 않음):
+
+```ini
+part=xc7z020clg400-1
+
+[hls]
+flow_target=vivado
+package.output.format=ip_catalog
+package.output.syn=false
+syn.file=../GEMM_tiled/gemm_tiled.cc
+syn.file=../GEMM_tiled/gemm_tiled.h
+syn.top=gemm_tiled
+tb.file=../GEMM_tiled/gemm_tiled_tb.cc
+clock=100mhz
+```
