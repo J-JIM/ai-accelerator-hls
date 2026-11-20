@@ -19,7 +19,7 @@ results/p3_final_struct_u16/   csynth.rpt · gemm_tiled_csynth.rpt · gemm_tiled
 
 ## 실행
 
-Vitis Unified IDE에서 `vadd` 또는 `GEMM` 컴포넌트를 열고 C Simulation → C Synthesis → C/RTL Co-simulation 순서로 실행합니다. CLI로는:
+Vitis Unified IDE에서 `vadd` · `GEMM` · `Gemm_Tiled` 중 하나의 컴포넌트를 열고 C Simulation → C Synthesis → C/RTL Co-simulation 순서로 실행합니다. CLI로는:
 
 ```bash
 source <Vitis 설치 경로>/settings64.sh
